@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - IIoT Temperature System</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="brand">
+                <span class="brand-icon">▶</span>
+                <span class="brand-text">IIoT</span>
+            </div>
+            <div class="hero-content">
+                <h1>Email<br>Verification</h1>
+                <p>Securing your account</p>
+            </div>
+            <div class="iot-illustration">
+                <div class="iot-graphic">
+                    <div class="iot-circle">
+                        <span class="wifi-icon">📶</span>
+                    </div>
+                    <div class="iot-blocks">
+                        <div class="block block-1">I</div>
+                        <div class="block block-2">o</div>
+                        <div class="block block-3">T</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-form-container verify-container">
+                <div id="verifyLoading" class="verify-status">
+                    <div class="spinner"></div>
+                    <h2>Verifying your email...</h2>
+                    <p>Please wait while we verify your account.</p>
+                </div>
+                
+                <div id="verifySuccess" class="verify-status hidden">
+                    <div class="status-icon success">✓</div>
+                    <h2>Email Verified!</h2>
+                    <p>Your email has been verified successfully. You can now sign in to your account.</p>
+                    <a href="signin.html" class="auth-btn">Sign In</a>
+                </div>
+                
+                <div id="verifyError" class="verify-status hidden">
+                    <div class="status-icon error">✕</div>
+                    <h2>Verification Failed</h2>
+                    <p id="verifyErrorMessage">The verification link is invalid or has expired.</p>
+                    <a href="signin.html" class="auth-btn secondary">Back to Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (!token) {
+                showVerifyError('No verification token provided.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${AUTH_API_URL}/verify/${token}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showVerifySuccess();
+                } else {
+                    showVerifyError(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                showVerifyError('Failed to connect to server');
+            }
+        });
+        
+        function showVerifySuccess() {
+            document.getElementById('verifyLoading').classList.add('hidden');
+            document.getElementById('verifySuccess').classList.remove('hidden');
+        }
+        
+        function showVerifyError(message) {
+            document.getElementById('verifyLoading').classList.add('hidden');
+            document.getElementById('verifyError').classList.remove('hidden');
+            document.getElementById('verifyErrorMessage').textContent = message;
+        }
+    </script>
+</body>
+</html>

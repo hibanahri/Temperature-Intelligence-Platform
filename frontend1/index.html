@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIoT Temperature Monitoring System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="brand">
+                    <span class="brand-icon">▶</span>
+                    <span class="brand-text">IIoT</span>
+                </div>
+                <p class="subtitle">Temperature Intelligence Platform</p>
+            </div>
+            <div class="header-center">
+                <nav class="main-nav">
+                    <a href="#" class="nav-link active">Dashboard</a>
+                    <a href="#" class="nav-link">Features</a>
+                    <a href="#" class="nav-link">Analytics</a>
+                    <a href="#" class="nav-link">Settings</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="user-menu" id="userMenu">
+                    <span class="user-name" id="userName">Guest</span>
+                    <button class="logout-btn" id="logoutBtn" onclick="handleLogout()">Logout</button>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-banner">
+        <p><strong>System Overview:</strong> An AI-powered tool that predicts room temperature using IoT sensor data and machine learning analysis. The system recognizes time patterns, room behavior, and historical trends to deliver accurate temperature predictions.</p>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="prediction">Prediction</button>
+        <button class="tab-btn" data-tab="comparison">Model Evaluation</button>
+        <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="alerts">Alerts <span id="alertBadge" class="alert-badge hidden">0</span></button>
+    </div>
+
+    <div class="container">
+        <!-- Prediction Tab -->
+        <div id="prediction-tab" class="tab-content active">
+            <div class="two-column">
+                <div class="card">
+                    <h2>Prediction Parameters</h2>
+                    <form id="predictionForm">
+                        <div class="form-group">
+                            <label>Room / Location</label>
+                            <select id="roomId" required>
+                                <option value="Room_101">Room 101</option>
+                                <option value="Room_102">Room 102</option>
+                                <option value="Room_103">Room 103</option>
+                                <option value="Server_Room">Server Room</option>
+                                <option value="Laboratory">Laboratory</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" id="time" required>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Sample Data</h3>
+                            <div class="sample-buttons">
+                                <button type="button" class="sample-btn" onclick="loadSampleIn()">Load Sample: Indoor (29C)</button>
+                                <button type="button" class="sample-btn" onclick="loadSampleOut()">Load Sample: Outdoor (42C)</button>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Alert Thresholds</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Minimum Alert Threshold (C)</label>
+                                    <input type="number" id="tempMin" step="0.1" value="18.0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Maximum Alert Threshold (C)</label>
+                                    <input type="number" id="tempMax" step="0.1" value="25.0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Temperature Data</h3>
+
+                            <div class="form-group">
+                                <label>Temperature 1 hour ago (C)</label>
+                                <input type="number" id="tempLag1" step="0.1" value="20.5" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Temperature 24 hours ago (C)</label>
+                                <input type="number" id="tempLag24" step="0.1" value="20.0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>24-Hour Rolling Average (C)</label>
+                                <input type="number" id="rollingMean24" step="0.1" value="20.2" required>
+                                <small class="field-hint">Calculated as: (Temp 1h ago + Temp 24h ago) / 2, or enter manually if you have more data points</small>
+                                <button type="button" class="calc-btn" onclick="calculateRollingAvg()">Auto-Calculate</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sensor Location</label>
+                                <select id="location" required>
+                                    <option value="indoor">Indoor</option>
+                                    <option value="outdoor">Outdoor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="predictBtn">
+                            Generate Prediction
+                        </button>
+                    </form>
+                </div>
+
+                <div class="results-section">
+                    <div class="card">
+                        <h2>Prediction Results</h2>
+                        <div id="resultsContent">
+                            <div class="empty-state">
+                                <p>Enter parameters and click "Generate Prediction" to view results.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label">Monitoring</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0.5 C</div>
+                            <div class="stat-label">Precision</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Evaluation Tab -->
+        <div id="comparison-tab" class="tab-content">
+            <div class="card">
+                <h2>Model Evaluation: Actual vs Predicted</h2>
+                <p class="section-description">Enter actual temperature values to compare against model predictions and evaluate accuracy.</p>
+                
+                <form id="comparisonForm">
+                    <div class="comparison-inputs">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Room / Location</label>
+                                <select id="compRoomId" required>
+                                    <option value="Room_101">Room 101</option>
+                                    <option value="Room_102">Room 102</option>
+                                    <option value="Room_103">Room 103</option>
+                                    <option value="Server_Room">Server Room</option>
+                                    <option value="Laboratory">Laboratory</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="compDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" id="compTime" required>
+                            </div>
+                        </div>
+
+                        <div class="sample-buttons" style="margin-bottom: 16px;">
+                            <button type="button" class="sample-btn" onclick="loadCompSampleIn()">Load Sample: Indoor (29C)</button>
+                            <button type="button" class="sample-btn" onclick="loadCompSampleOut()">Load Sample: Outdoor (42C)</button>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Min Alert Threshold (C)</label>
+                                <input type="number" id="compTempMin" step="0.1" value="18.0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Max Alert Threshold (C)</label>
+                                <input type="number" id="compTempMax" step="0.1" value="25.0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Temperature 1 hour ago (C)</label>
+                                <input type="number" id="compTempLag1" step="0.1" value="20.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Temperature 24 hours ago (C)</label>
+                                <input type="number" id="compTempLag24" step="0.1" value="20.0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>24-Hour Rolling Average (C)</label>
+                                <input type="number" id="compRollingMean" step="0.1" value="20.2" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sensor Location</label>
+                                <select id="compLocation" required>
+                                    <option value="indoor">Indoor</option>
+                                    <option value="outdoor">Outdoor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Actual Temperature (C)</label>
+                                <input type="number" id="actualTemp" step="0.1" placeholder="Enter actual measured value" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Compare Values</button>
+                </form>
+            </div>
+
+            <div class="card" id="comparisonResults" style="display: none;">
+                <h2>Comparison Results</h2>
+                
+                <div class="comparison-display">
+                    <div class="comparison-values">
+                        <div class="value-box actual">
+                            <div class="value-label">Actual Value</div>
+                            <div class="value-number" id="displayActual">--</div>
+                            <div class="value-unit">Celsius</div>
+                        </div>
+                        <div class="value-box predicted">
+                            <div class="value-label">Predicted Value</div>
+                            <div class="value-number" id="displayPredicted">--</div>
+                            <div class="value-unit">Celsius</div>
+                        </div>
+                        <div class="value-box difference">
+                            <div class="value-label">Difference</div>
+                            <div class="value-number" id="displayDifference">--</div>
+                            <div class="value-unit">Celsius</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Absolute Error</div>
+                        <div class="metric-value" id="metricAE">--</div>
+                        <div class="metric-description">|Actual - Predicted|</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Percentage Error</div>
+                        <div class="metric-value" id="metricPE">--</div>
+                        <div class="metric-description">|(Actual - Predicted) / Actual| x 100</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Squared Error</div>
+                        <div class="metric-value" id="metricSE">--</div>
+                        <div class="metric-description">(Actual - Predicted)^2</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Accuracy Rating</div>
+                        <div class="metric-value" id="metricAccuracy">--</div>
+                        <div class="metric-description">Based on error threshold</div>
+                    </div>
+                </div>
+
+                <div class="accuracy-indicator">
+                    <div class="accuracy-bar">
+                        <div class="accuracy-fill" id="accuracyFill"></div>
+                    </div>
+                    <div class="accuracy-labels">
+                        <span>Poor</span>
+                        <span>Fair</span>
+                        <span>Good</span>
+                        <span>Excellent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Comparison History</h2>
+                <div id="comparisonHistory">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Room</th>
+                                <th>Actual (C)</th>
+                                <th>Predicted (C)</th>
+                                <th>Error (C)</th>
+                                <th>Error (%)</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-table">No comparison data available. Submit a comparison to begin.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="aggregate-metrics" id="aggregateMetrics" style="display: none;">
+                    <h3>Aggregate Statistics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Mean Absolute Error (MAE)</div>
+                            <div class="metric-value" id="aggMAE">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Root Mean Squared Error (RMSE)</div>
+                            <div class="metric-value" id="aggRMSE">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Mean Percentage Error (MPE)</div>
+                            <div class="metric-value" id="aggMPE">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Total Comparisons</div>
+                            <div class="metric-value" id="aggCount">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content">
+            <div class="card">
+                <h3>IoT Temperature Over Time</h3>
+                <p class="chart-description">Historical temperature readings from IoT sensors showing indoor and outdoor measurements.</p>
+                <div class="visualization-container">
+                    <img src="../visualization/iot temp over time.png" alt="IoT Temperature Over Time" class="visualization-img">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Average Temperature by Hour of Day</h3>
+                <p class="chart-description">Temperature patterns throughout the day showing peak and low temperature hours.</p>
+                <div class="visualization-container">
+                    <img src="../visualization/avg temp by hour of day.png" alt="Average Temperature by Hour of Day" class="visualization-img">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>XGBoost Model Learning Curve</h3>
+                <p class="chart-description">Training and validation performance of the XGBoost temperature prediction model.</p>
+                <div class="visualization-container">
+                    <img src="../visualization/xgboost learning curve.png" alt="XGBoost Learning Curve" class="visualization-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Tab -->
+        <div id="alerts-tab" class="tab-content">
+            <div class="alert-cards">
+                <div class="alert-card cold">
+                    <h3>Cold Alert</h3>
+                    <div class="alert-temp" id="coldAlertValue">&lt; 18 C</div>
+                    <p>Check heating systems</p>
+                </div>
+                <div class="alert-card optimal">
+                    <h3>Optimal Range</h3>
+                    <div class="alert-temp" id="optimalRangeValue">18-25 C</div>
+                    <p>Normal operation</p>
+                </div>
+                <div class="alert-card hot">
+                    <h3>Hot Alert</h3>
+                    <div class="alert-temp" id="hotAlertValue">&gt; 25 C</div>
+                    <p>Check cooling systems</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Alerts</h3>
+                <div class="alert-list" id="alertsList">
+                    <div class="empty-state">
+                        <p>No alerts generated yet. Make predictions to generate alerts.</p>
+                    </div>
+                </div>
+                <button type="button" class="clear-btn" onclick="clearAlerts()" style="margin-top: 16px;">Clear All Alerts</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>IIoT Temperature Monitoring System - 2024</p>
+        <p class="footer-sub">Powered by Machine Learning and IoT Technology</p>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!isAuthenticated()) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            // Display user info
+            const user = getUser();
+            if (user) {
+                document.getElementById('userName').textContent = user.name || user.email;
+            }
+        });
+        
+        function handleLogout() {
+            logout();
+        }
+    </script>
+</body>
+</html>

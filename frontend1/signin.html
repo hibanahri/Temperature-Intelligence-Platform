@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - IIoT Temperature System</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="brand">
+                <span class="brand-icon">▶</span>
+                <span class="brand-text">IIoT</span>
+            </div>
+            <nav class="auth-nav">
+                <a href="#">Pricing</a>
+                <a href="#">Features</a>
+                <a href="#">Blog</a>
+                <a href="#">F.A.Q.</a>
+                <a href="#">Contact</a>
+            </nav>
+            <div class="hero-content">
+                <h1>Monitor Your<br>Temperature</h1>
+                <p>Best IoT tools for industrial monitoring</p>
+            </div>
+            <div class="iot-illustration">
+                <div class="iot-graphic">
+                    <div class="iot-circle">
+                        <span class="wifi-icon">📶</span>
+                    </div>
+                    <div class="iot-blocks">
+                        <div class="block block-1">I</div>
+                        <div class="block block-2">o</div>
+                        <div class="block block-3">T</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <h2>Welcome Back</h2>
+                <p class="auth-subtitle">Sign in to your account</p>
+                
+                <div id="errorMessage" class="error-message hidden"></div>
+                <div id="successMessage" class="success-message hidden"></div>
+                
+                <form id="signinForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="auth-btn" id="submitBtn">Sign In</button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+        document.getElementById('signinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleSignin();
+        });
+    </script>
+</body>
+</html>
